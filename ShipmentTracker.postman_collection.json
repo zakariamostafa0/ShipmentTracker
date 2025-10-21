@@ -1,0 +1,1765 @@
+{
+	"info": {
+		"_postman_id": "shipment-tracker-api",
+		"name": "Shipment Tracker API",
+		"description": "Complete API collection for Shipment Tracker system with full workflow testing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Admin Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.success && response.data.accessToken) {",
+									"        pm.environment.set('admin_access_token', response.data.accessToken);",
+									"        pm.environment.set('admin_user_id', response.data.userId);",
+									"        pm.environment.set('admin_user_name', response.data.userName);",
+									"        console.log('Admin token saved successfully');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userName\": \"admin\",\n  \"password\": \"{{admin_password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "Client Registration",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userName\": \"testclient\",\n  \"email\": \"client@test.com\",\n  \"displayName\": \"Test Client\",\n  \"password\": \"TestPass123!\",\n  \"phoneNumber\": \"+1-555-0123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					}
+				},
+				{
+					"name": "Client Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.success && response.data.accessToken) {",
+									"        pm.environment.set('client_access_token', response.data.accessToken);",
+									"        pm.environment.set('client_user_id', response.data.userId);",
+									"        console.log('Client token saved successfully');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userName\": \"testclient\",\n  \"password\": \"TestPass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "Verify Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"{{verification_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/verify-email",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"verify-email"
+							]
+						}
+					}
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/refresh",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Master Data Setup",
+			"item": [
+				{
+					"name": "Branches",
+					"item": [
+						{
+							"name": "Create Branch - NYC",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 201) {",
+											"    const response = pm.response.json();",
+											"    if (response.success && response.data.id) {",
+											"        pm.environment.set('branch_nyc_id', response.data.id);",
+											"        console.log('NYC Branch ID saved:', response.data.id);",
+											"    }",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"New York Branch\",\n  \"address\": \"123 Main St, New York, NY 10001\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/branches",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"branches"
+									]
+								}
+							}
+						},
+						{
+							"name": "Create Branch - LAX",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 201) {",
+											"    const response = pm.response.json();",
+											"    if (response.success && response.data.id) {",
+											"        pm.environment.set('branch_lax_id', response.data.id);",
+											"        console.log('LAX Branch ID saved:', response.data.id);",
+											"    }",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Los Angeles Branch\",\n  \"address\": \"456 Oak Ave, Los Angeles, CA 90210\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/branches",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"branches"
+									]
+								}
+							}
+						},
+						{
+							"name": "Get All Branches",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/branches",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"branches"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Warehouses",
+					"item": [
+						{
+							"name": "Create Warehouse - NYC",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 201) {",
+											"    const response = pm.response.json();",
+											"    if (response.success && response.data.id) {",
+											"        pm.environment.set('warehouse_nyc_id', response.data.id);",
+											"        console.log('NYC Warehouse ID saved:', response.data.id);",
+											"    }",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"NYC Warehouse\",\n  \"address\": \"789 Industrial Blvd, Brooklyn, NY 11201\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/warehouses",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"warehouses"
+									]
+								}
+							}
+						},
+						{
+							"name": "Create Warehouse - LAX",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 201) {",
+											"    const response = pm.response.json();",
+											"    if (response.success && response.data.id) {",
+											"        pm.environment.set('warehouse_lax_id', response.data.id);",
+											"        console.log('LAX Warehouse ID saved:', response.data.id);",
+											"    }",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"LAX Warehouse\",\n  \"address\": \"321 Logistics Way, Los Angeles, CA 90058\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/warehouses",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"warehouses"
+									]
+								}
+							}
+						},
+						{
+							"name": "Get All Warehouses",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/warehouses",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"warehouses"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Ports",
+					"item": [
+						{
+							"name": "Create Port - NYC",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 201) {",
+											"    const response = pm.response.json();",
+											"    if (response.success && response.data.id) {",
+											"        pm.environment.set('port_nyc_id', response.data.id);",
+											"        console.log('NYC Port ID saved:', response.data.id);",
+											"    }",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Port of New York\",\n  \"address\": \"Port Authority, New York, NY\",\n  \"country\": \"USA\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/ports",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"ports"
+									]
+								}
+							}
+						},
+						{
+							"name": "Create Port - LAX",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 201) {",
+											"    const response = pm.response.json();",
+											"    if (response.success && response.data.id) {",
+											"        pm.environment.set('port_lax_id', response.data.id);",
+											"        console.log('LAX Port ID saved:', response.data.id);",
+											"    }",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Port of Los Angeles\",\n  \"address\": \"Port of LA, San Pedro, CA\",\n  \"country\": \"USA\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/ports",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"ports"
+									]
+								}
+							}
+						},
+						{
+							"name": "Get All Ports",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/ports",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"ports"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Carriers",
+					"item": [
+						{
+							"name": "Create Carrier - FastTrack",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 201) {",
+											"    const response = pm.response.json();",
+											"    if (response.success && response.data.id) {",
+											"        pm.environment.set('carrier_fasttrack_id', response.data.id);",
+											"        console.log('FastTrack Carrier ID saved:', response.data.id);",
+											"    }",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"FastTrack Delivery\",\n  \"contactInfo\": \"Phone: (555) 123-4567, Email: dispatch@fasttrack.com\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/carriers",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"carriers"
+									]
+								}
+							}
+						},
+						{
+							"name": "Create Carrier - Reliable",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 201) {",
+											"    const response = pm.response.json();",
+											"    if (response.success && response.data.id) {",
+											"        pm.environment.set('carrier_reliable_id', response.data.id);",
+											"        console.log('Reliable Carrier ID saved:', response.data.id);",
+											"    }",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Reliable Logistics\",\n  \"contactInfo\": \"Phone: (555) 987-6543, Email: info@reliable.com\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/carriers",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"carriers"
+									]
+								}
+							}
+						},
+						{
+							"name": "Get All Carriers",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/carriers",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"carriers"
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "3. Shipment & Batch Creation",
+			"item": [
+				{
+					"name": "Create Shipment 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.success && response.data.id) {",
+									"        pm.environment.set('shipment_1_id', response.data.id);",
+									"        console.log('Shipment 1 ID saved:', response.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"clientId\": {{client_user_id}},\n  \"weight\": 5.5,\n  \"volume\": 2.0,\n  \"pickupAddress\": \"123 Client St, New York, NY\",\n  \"deliveryAddress\": \"456 Delivery Ave, Los Angeles, CA\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/shipments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shipments"
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Shipment 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.success && response.data.id) {",
+									"        pm.environment.set('shipment_2_id', response.data.id);",
+									"        console.log('Shipment 2 ID saved:', response.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"clientId\": {{client_user_id}},\n  \"weight\": 3.2,\n  \"volume\": 1.5,\n  \"pickupAddress\": \"789 Pickup Rd, New York, NY\",\n  \"deliveryAddress\": \"321 Destination St, Los Angeles, CA\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/shipments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shipments"
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Batch",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.success && response.data.id) {",
+									"        pm.environment.set('batch_id', response.data.id);",
+									"        console.log('Batch ID saved:', response.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"NYC to LAX Batch 001\",\n  \"branchId\": {{branch_nyc_id}},\n  \"thresholdCount\": 2,\n  \"thresholdWeight\": 5.0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/batches",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"batches"
+							]
+						}
+					}
+				},
+				{
+					"name": "Add Shipment 1 to Batch",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/batches/{{batch_id}}/shipments/{{shipment_1_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"batches",
+								"{{batch_id}}",
+								"shipments",
+								"{{shipment_1_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Add Shipment 2 to Batch",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/batches/{{batch_id}}/shipments/{{shipment_2_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"batches",
+								"{{batch_id}}",
+								"shipments",
+								"{{shipment_2_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Close Batch",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"notes\": \"Batch ready for warehouse processing\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/batches/{{batch_id}}/close",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"batches",
+								"{{batch_id}}",
+								"close"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Warehouse Processing",
+			"item": [
+				{
+					"name": "Move Batch to Source Warehouse",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sourceWarehouseId\": {{warehouse_nyc_id}},\n  \"notes\": \"Batch received at NYC warehouse\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/batches/{{batch_id}}/move-to-warehouse",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"batches",
+								"{{batch_id}}",
+								"move-to-warehouse"
+							]
+						}
+					}
+				},
+				{
+					"name": "Assign Destination Warehouse",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"destinationWarehouseId\": {{warehouse_lax_id}},\n  \"notes\": \"Destination warehouse assigned for final delivery\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/batches/{{batch_id}}/assign-destination-warehouse",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"batches",
+								"{{batch_id}}",
+								"assign-destination-warehouse"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get NYC Warehouse Batches",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/warehouses/{{warehouse_nyc_id}}/batches",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warehouses",
+								"{{warehouse_nyc_id}}",
+								"batches"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get LAX Warehouse Batches",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/warehouses/{{warehouse_lax_id}}/batches",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"warehouses",
+								"{{warehouse_lax_id}}",
+								"batches"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Port Operations",
+			"item": [
+				{
+					"name": "Move to Source Port",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sourcePortId\": {{port_nyc_id}},\n  \"destinationPortId\": {{port_lax_id}},\n  \"notes\": \"Batch moved to source port for customs\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/batches/{{batch_id}}/move-to-source-port",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"batches",
+								"{{batch_id}}",
+								"move-to-source-port"
+							]
+						}
+					}
+				},
+				{
+					"name": "Clear Source Port",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"notes\": \"Customs clearance completed\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/batches/{{batch_id}}/clear-source-port",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"batches",
+								"{{batch_id}}",
+								"clear-source-port"
+							]
+						}
+					}
+				},
+				{
+					"name": "Return to Source Warehouse",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sourceWarehouseId\": {{warehouse_nyc_id}},\n  \"notes\": \"Batch returned to source warehouse after customs clearance\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/batches/{{batch_id}}/move-to-warehouse",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"batches",
+								"{{batch_id}}",
+								"move-to-warehouse"
+							]
+						}
+					}
+				},
+				{
+					"name": "Start Transit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"notes\": \"Vessel departed for destination\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/batches/{{batch_id}}/start-transit",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"batches",
+								"{{batch_id}}",
+								"start-transit"
+							]
+						}
+					}
+				},
+				{
+					"name": "Mark Arrival at Destination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"notes\": \"Vessel arrived at destination port\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/batches/{{batch_id}}/arrival",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"batches",
+								"{{batch_id}}",
+								"arrival"
+							]
+						}
+					}
+				},
+				{
+					"name": "Move to Destination Warehouse",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sourceWarehouseId\": {{warehouse_lax_id}},\n  \"notes\": \"Batch moved to destination warehouse for final processing\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/batches/{{batch_id}}/move-to-destination-warehouse",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"batches",
+								"{{batch_id}}",
+								"move-to-destination-warehouse"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Carrier Assignment",
+			"item": [
+				{
+					"name": "Assign Carriers to Shipments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"assignments\": [\n    {\n      \"shipmentId\": {{shipment_1_id}},\n      \"carrierId\": {{carrier_fasttrack_id}}\n    },\n    {\n      \"shipmentId\": {{shipment_2_id}},\n      \"carrierId\": {{carrier_reliable_id}}\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/batches/{{batch_id}}/assign-carriers",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"batches",
+								"{{batch_id}}",
+								"assign-carriers"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "7. Delivery Operations",
+			"item": [
+				{
+					"name": "Update Shipment 1 - Out for Delivery",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": 7,\n  \"notes\": \"Package picked up by driver\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/shipments/{{shipment_1_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shipments",
+								"{{shipment_1_id}}",
+								"status"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Shipment 1 - Delivered",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": 8,\n  \"notes\": \"Package delivered successfully\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/shipments/{{shipment_1_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shipments",
+								"{{shipment_1_id}}",
+								"status"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Shipment 2 - Out for Delivery",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": 7,\n  \"notes\": \"Package picked up by driver\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/shipments/{{shipment_2_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shipments",
+								"{{shipment_2_id}}",
+								"status"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Shipment 2 - Delivered",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": 8,\n  \"notes\": \"Package delivered successfully\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/shipments/{{shipment_2_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shipments",
+								"{{shipment_2_id}}",
+								"status"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "8. Client Experience",
+			"item": [
+				{
+					"name": "Get Client Info",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{client_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/clients/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clients",
+								"me"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Client Shipments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{client_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/clients/me/shipments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clients",
+								"me",
+								"shipments"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Client Shipment Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{client_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/clients/me/shipments/{{shipment_1_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clients",
+								"me",
+								"shipments",
+								"{{shipment_1_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Client Announcements",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{client_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/clients/me/announcements",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clients",
+								"me",
+								"announcements"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "9. Admin Management",
+			"item": [
+				{
+					"name": "Create Announcement",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.success && response.data.id) {",
+									"        pm.environment.set('announcement_id', response.data.id);",
+									"        console.log('Announcement ID saved:', response.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Holiday Shipping Notice\",\n  \"content\": \"Please note that shipping will be delayed during the holiday season.\",\n  \"startDate\": \"2024-12-01T00:00:00Z\",\n  \"endDate\": \"2024-12-31T23:59:59Z\",\n  \"targets\": [\n    {\n      \"clientId\": {{client_user_id}}\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/announcements",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"announcements"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Top Clients",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/clients/top?branchId={{branch_nyc_id}}&count=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clients",
+								"top"
+							],
+							"query": [
+								{
+									"key": "branchId",
+									"value": "{{branch_nyc_id}}"
+								},
+								{
+									"key": "count",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All Batches",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/batches?branchId={{branch_nyc_id}}&status=8",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"batches"
+							],
+							"query": [
+								{
+									"key": "branchId",
+									"value": "{{branch_nyc_id}}"
+								},
+								{
+									"key": "status",
+									"value": "8"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All Shipments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/shipments?status=8",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shipments"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "8"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "10. Additional Endpoints",
+			"item": [
+				{
+					"name": "Get Batch Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/batches/{{batch_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"batches",
+								"{{batch_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Shipment Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/shipments/{{shipment_1_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shipments",
+								"{{shipment_1_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Unassigned Shipments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/shipments/unassigned",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shipments",
+								"unassigned"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All Announcements",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/announcements",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"announcements"
+							]
+						}
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global pre-request script",
+					"console.log('Making request to:', pm.request.url.toString());"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test script",
+					"pm.test('Response time is less than 5000ms', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+					"});",
+					"",
+					"pm.test('Response has valid JSON', function () {",
+					"    pm.response.to.be.json;",
+					"});"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://localhost:7098",
+			"type": "string"
+		}
+	]
+}
