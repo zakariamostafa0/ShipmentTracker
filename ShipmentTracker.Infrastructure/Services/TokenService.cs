@@ -16,6 +16,7 @@ public class TokenService : ITokenService
     private readonly string _jwtSecret;
     private readonly string _jwtIssuer;
     private readonly string _jwtAudience;
+    private readonly int _jwtExpiryExpirydaysInt;
 
     public TokenService(IUnitOfWork unitOfWork, IConfiguration configuration)
     {
@@ -24,6 +25,7 @@ public class TokenService : ITokenService
         _jwtSecret = _configuration["Jwt:Secret"] ?? throw new InvalidOperationException("JWT Secret not configured");
         _jwtIssuer = _configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer not configured");
         _jwtAudience = _configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT Audience not configured");
+        _jwtExpiryExpirydaysInt = int.Parse(_configuration["Jwt:Expirydays"] ?? "1");
     }
 
     public string GenerateAccessToken(User user, IEnumerable<string> roles)
@@ -48,7 +50,7 @@ public class TokenService : ITokenService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(15), // 15 minutes
+            Expires = DateTime.UtcNow.AddDays(_jwtExpiryExpirydaysInt), // 1 Day
             Issuer = _jwtIssuer,
             Audience = _jwtAudience,
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

@@ -17,6 +17,7 @@ public class ShipmentTrackerDbContext : DbContext
     public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<Client> Clients { get; set; }
+    public DbSet<UserPhoneNumber> UserPhoneNumbers { get; set; }
     public DbSet<Branch> Branches { get; set; }
     public DbSet<Warehouse> Warehouses { get; set; }
     public DbSet<Port> Ports { get; set; }
@@ -161,5 +162,11 @@ public class ShipmentTrackerDbContext : DbContext
             .HasOne(prt => prt.User)
             .WithMany(u => u.PasswordResetTokens)
             .HasForeignKey(prt => prt.UserId);
+
+        // Configure UserPhoneNumber relationships
+        modelBuilder.Entity<UserPhoneNumber>()
+            .HasOne(upn => upn.User)
+            .WithMany(u => u.PhoneNumbers)
+            .HasForeignKey(upn => upn.UserId);
     }
 }

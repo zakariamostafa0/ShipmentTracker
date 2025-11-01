@@ -8,6 +8,7 @@ public class User : BaseEntity
     public string Email { get; set; } = string.Empty;
     public byte[] PasswordHash { get; set; } = Array.Empty<byte>();
     public string DisplayName { get; set; } = string.Empty;
+    public Gender Gender { get; set; }
     public bool IsActive { get; set; } = true;
     public bool EmailVerified { get; set; } = false;
     
@@ -19,4 +20,5 @@ public class User : BaseEntity
     public virtual Client? Client { get; set; }
     public virtual ICollection<ShipmentEvent> ShipmentEvents { get; set; } = new List<ShipmentEvent>();
     public virtual ICollection<Announcement> CreatedAnnouncements { get; set; } = new List<Announcement>();
+    public virtual ICollection<UserPhoneNumber> PhoneNumbers { get; set; } = new List<UserPhoneNumber>();
 }

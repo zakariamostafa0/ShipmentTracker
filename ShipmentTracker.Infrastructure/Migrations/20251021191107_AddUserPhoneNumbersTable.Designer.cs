@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ShipmentTracker.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using ShipmentTracker.Infrastructure.Data;
 namespace ShipmentTracker.Infrastructure.Migrations
 {
     [DbContext(typeof(ShipmentTrackerDbContext))]
-    partial class ShipmentTrackerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251021191107_AddUserPhoneNumbersTable")]
+    partial class AddUserPhoneNumbersTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -641,9 +644,6 @@ namespace ShipmentTracker.Infrastructure.Migrations
 
                     b.Property<bool>("EmailVerified")
                         .HasColumnType("bit");
-
-                    b.Property<int>("Gender")
-                        .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");

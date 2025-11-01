@@ -11,6 +11,7 @@ public interface IUnitOfWork : IDisposable
     IRepository<EmailVerificationToken> EmailVerificationTokens { get; }
     IRepository<PasswordResetToken> PasswordResetTokens { get; }
     IClientRepository Clients { get; }
+    IRepository<UserPhoneNumber> UserPhoneNumbers { get; }
     IRepository<Branch> Branches { get; }
     IRepository<Warehouse> Warehouses { get; }
     IRepository<Port> Ports { get; }

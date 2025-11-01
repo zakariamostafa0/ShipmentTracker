@@ -41,6 +41,27 @@ public class AuthController : ControllerBase
     {
         try
         {
+            // Validate primary phone number format first
+            if (!IsValidPhoneNumber(request.PhoneNumber))
+            {
+                return BadRequest(new { message = $"Invalid primary phone number format: {request.PhoneNumber}" });
+            }
+
+            // Validate additional phone numbers if provided
+            if (request.AdditionalPhoneNumbers != null && request.AdditionalPhoneNumbers.Any())
+            {
+                foreach (var phoneNumber in request.AdditionalPhoneNumbers)
+                {
+                    if (!string.IsNullOrWhiteSpace(phoneNumber))
+                    {
+                        if (!IsValidPhoneNumber(phoneNumber))
+                        {
+                            return BadRequest(new { message = $"Invalid additional phone number format: {phoneNumber}" });
+                        }
+                    }
+                }
+            }
+
             // Check if username already exists
             if (!await _unitOfWork.Users.IsUserNameUniqueAsync(request.UserName))
             {
@@ -59,6 +80,7 @@ public class AuthController : ControllerBase
                 UserName = request.UserName,
                 Email = request.Email,
                 DisplayName = request.DisplayName,
+                Gender = request.Gender,
                 PasswordHash = System.Text.Encoding.UTF8.GetBytes(BCrypt.Net.BCrypt.HashPassword(request.Password)),
                 IsActive = false, // Will be activated after email verification
                 EmailVerified = false
@@ -79,13 +101,44 @@ public class AuthController : ControllerBase
                 await _unitOfWork.UserRoles.AddAsync(userRole);
             }
 
-            // Create client record
+            // Create client record with primary phone
             var client = new Client
             {
                 UserId = user.Id,
-                PhoneNumber = request.PhoneNumber ?? string.Empty
+                PhoneNumber = request.PhoneNumber // Now required
             };
             await _unitOfWork.Clients.AddAsync(client);
+
+            // Add primary phone to UserPhoneNumber table
+            var primaryPhone = new UserPhoneNumber
+            {
+                UserId = user.Id,
+                PhoneNumber = request.PhoneNumber,
+                IsPrimary = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            await _unitOfWork.UserPhoneNumbers.AddAsync(primaryPhone);
+
+            // Add additional phone numbers if provided
+            if (request.AdditionalPhoneNumbers != null && request.AdditionalPhoneNumbers.Any())
+            {
+                foreach (var phoneNumber in request.AdditionalPhoneNumbers)
+                {
+                    if (!string.IsNullOrWhiteSpace(phoneNumber))
+                    {
+                        var additionalPhone = new UserPhoneNumber
+                        {
+                            UserId = user.Id,
+                            PhoneNumber = phoneNumber,
+                            IsPrimary = false,
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow
+                        };
+                        await _unitOfWork.UserPhoneNumbers.AddAsync(additionalPhone);
+                    }
+                }
+            }
 
             await _unitOfWork.SaveChangesAsync();
 
@@ -104,19 +157,19 @@ public class AuthController : ControllerBase
         }
     }
 
-    [HttpPost("verify-email")]
-    public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest request)
+    [HttpGet("verify-email")]
+    public async Task<IActionResult> VerifyEmail([FromQuery] string token)
     {
         try
         {
             // Validate token
-            if (!await _tokenService.ValidateEmailVerificationTokenAsync(request.Token))
+            if (!await _tokenService.ValidateEmailVerificationTokenAsync(token))
             {
                 return BadRequest(new { message = "Invalid or expired verification token" });
             }
 
             // Get the verification token record
-            var verificationToken = await _unitOfWork.EmailVerificationTokens.FirstOrDefaultAsync(evt => evt.Token == request.Token);
+            var verificationToken = await _unitOfWork.EmailVerificationTokens.FirstOrDefaultAsync(evt => evt.Token == token);
             if (verificationToken == null)
             {
                 return BadRequest(new { message = "Invalid verification token" });
@@ -134,7 +187,7 @@ public class AuthController : ControllerBase
             await _unitOfWork.Users.UpdateAsync(user);
 
             // Mark token as used
-            await _tokenService.MarkEmailVerificationTokenAsUsedAsync(request.Token);
+            await _tokenService.MarkEmailVerificationTokenAsUsedAsync(token);
 
             await _unitOfWork.SaveChangesAsync();
 
@@ -310,18 +363,18 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("reset-password")]
-    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    public async Task<IActionResult> ResetPassword([FromQuery] string token, [FromBody] NewPasswordRequest request)
     {
         try
         {
             // Validate token
-            if (!await _tokenService.ValidatePasswordResetTokenAsync(request.Token))
+            if (!await _tokenService.ValidatePasswordResetTokenAsync(token))
             {
                 return BadRequest(new { message = "Invalid or expired reset token" });
             }
 
             // Get the reset token record
-            var resetToken = await _unitOfWork.PasswordResetTokens.FirstOrDefaultAsync(prt => prt.Token == request.Token);
+            var resetToken = await _unitOfWork.PasswordResetTokens.FirstOrDefaultAsync(prt => prt.Token == token);
             if (resetToken == null)
             {
                 return BadRequest(new { message = "Invalid reset token" });
@@ -338,7 +391,7 @@ public class AuthController : ControllerBase
             await _unitOfWork.Users.UpdateAsync(user);
 
             // Mark token as used
-            await _tokenService.MarkPasswordResetTokenAsUsedAsync(request.Token);
+            await _tokenService.MarkPasswordResetTokenAsUsedAsync(token);
 
             await _unitOfWork.SaveChangesAsync();
 
@@ -493,5 +546,27 @@ public class AuthController : ControllerBase
             _logger.LogError(ex, "Error deactivating user {UserId}", id);
             return StatusCode(500, ApiResponse.ErrorResult("An error occurred while deactivating user"));
         }
+    }
+
+    private static bool IsValidPhoneNumber(string phoneNumber)
+    {
+        if (string.IsNullOrWhiteSpace(phoneNumber))
+            return false;
+
+        var cleaned = phoneNumber.Trim();
+        
+        // Allow formats like: +1234567890, 1234567890, +1-234-567-890, (123) 456-7890
+        // Remove common separators but keep + at the beginning
+        var normalized = cleaned.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace(".", "");
+        
+        // Must start with + for international format or be all digits
+        if (!normalized.StartsWith("+") && !normalized.All(c => char.IsDigit(c)))
+            return false;
+
+        // Remove + and check if remaining characters are digits
+        var digitsOnly = normalized.StartsWith("+") ? normalized.Substring(1) : normalized;
+        
+        // Must have at least 7 digits and at most 15 digits (international standard)
+        return digitsOnly.All(char.IsDigit) && digitsOnly.Length >= 7 && digitsOnly.Length <= 15;
     }
 }

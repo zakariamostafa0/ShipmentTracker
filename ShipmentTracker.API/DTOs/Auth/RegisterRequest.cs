@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using ShipmentTracker.Core.Enums;
 
 namespace ShipmentTracker.API.DTOs.Auth;
 
@@ -20,6 +21,13 @@ public record RegisterRequest(
     [StringLength(100, MinimumLength = 6)]
     string Password,
     
+    [Required]
+    [Phone]
     [StringLength(20)]
-    string? PhoneNumber
+    string PhoneNumber,
+    
+    [Required]
+    Gender Gender,
+    
+    List<string>? AdditionalPhoneNumbers
 );

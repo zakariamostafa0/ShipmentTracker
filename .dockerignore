@@ -1,0 +1,20 @@
+**/bin/
+**/obj/
+**/.vs/
+.vscode/
+.git/
+.gitignore
+Dockerfile
+*.user
+*.suo
+*.cache
+*.log
+*.tmp
+*.DS_Store
+node_modules/
+# Optional: exclude local publish artifacts
+/app/
+/publish/
+/build/
+
+

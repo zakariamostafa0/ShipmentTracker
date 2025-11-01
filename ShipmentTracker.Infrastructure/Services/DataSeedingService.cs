@@ -87,6 +87,7 @@ public class DataSeedingService : IDataSeedingService
             UserName = "admin",
             Email = "admin@shipmenttracker.com",
             DisplayName = "System Administrator",
+            Gender = Gender.PreferNotToSay,
             PasswordHash = System.Text.Encoding.UTF8.GetBytes(BCrypt.Net.BCrypt.HashPassword("Admin123!")),
             IsActive = true,
             EmailVerified = true,

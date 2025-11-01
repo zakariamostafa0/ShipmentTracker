@@ -22,6 +22,7 @@ public class UnitOfWork : IUnitOfWork
         EmailVerificationTokens = new GenericRepository<EmailVerificationToken>(_context);
         PasswordResetTokens = new GenericRepository<PasswordResetToken>(_context);
         Clients = new ClientRepository(_context);
+        UserPhoneNumbers = new GenericRepository<UserPhoneNumber>(_context);
         Branches = new GenericRepository<Branch>(_context);
         Warehouses = new GenericRepository<Warehouse>(_context);
         Ports = new GenericRepository<Port>(_context);
@@ -43,6 +44,7 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<EmailVerificationToken> EmailVerificationTokens { get; }
     public IRepository<PasswordResetToken> PasswordResetTokens { get; }
     public IClientRepository Clients { get; }
+    public IRepository<UserPhoneNumber> UserPhoneNumbers { get; }
     public IRepository<Branch> Branches { get; }
     public IRepository<Warehouse> Warehouses { get; }
     public IRepository<Port> Ports { get; }

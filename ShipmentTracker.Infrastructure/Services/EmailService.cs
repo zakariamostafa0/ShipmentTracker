@@ -29,7 +29,7 @@ public class EmailService : IEmailService
     public async Task SendEmailVerificationAsync(string email, string userName, string verificationToken)
     {
         var subject = "Verify Your Email Address";
-        var verificationUrl = $"{_configuration["App:BaseUrl"]}/verify-email?token={verificationToken}";
+        var verificationUrl = $"{_configuration["App:BaseUrl"]}/api/auth/verify-email?token={verificationToken}";
         
         var body = $@"
             <html>
@@ -53,7 +53,7 @@ public class EmailService : IEmailService
     public async Task SendPasswordResetAsync(string email, string userName, string resetToken)
     {
         var subject = "Reset Your Password";
-        var resetUrl = $"{_configuration["App:BaseUrl"]}/reset-password?token={resetToken}";
+        var resetUrl = $"{_configuration["App:BaseUrl"]}/api/auth/reset-password?token={resetToken}";
         
         var body = $@"
             <html>

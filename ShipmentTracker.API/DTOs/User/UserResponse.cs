@@ -1,4 +1,5 @@
 using ShipmentTracker.API.DTOs.Role;
+using ShipmentTracker.Core.Enums;
 
 namespace ShipmentTracker.API.DTOs.User;
 
@@ -8,6 +9,7 @@ public class UserResponse
     public string UserName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
+    public Gender Gender { get; set; }
     public bool IsActive { get; set; }
     public bool EmailVerified { get; set; }
     public List<RoleResponse> Roles { get; set; } = new();
